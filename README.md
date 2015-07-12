@@ -18,5 +18,10 @@ var QueryBuilder = sqlbuilder.QueryBuilder;
 
 var mySqlBuilder = new QueryBuilder(new MySqlGrammar());
 
-var sql = mysqlBuilder.select('*').from('users').whereYear('created_at', '=', 2014).toSql();
+var sql = mysqlBuilder
+.select('*').from('users')
+.whereYear('created_at', '=', 2014)
+.toSql();
+
+// select * from `users` where year(`created_at`) = ?
 ```
