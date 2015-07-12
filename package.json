@@ -1,0 +1,15 @@
+{
+  "name": "sqlbuilder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "inflection": "^1.7.1",
+    "lodash": "^3.10.0"
+  }
+}
