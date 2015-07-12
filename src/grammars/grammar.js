@@ -9,7 +9,9 @@ var trim = String.prototype.trim.apply,
 		values = _.values,
 		isArray = _.isArray,
 		isEmpty = _.isEmpty,
-		forEach = _.forEach;
+		forEach = _.forEach
+		isNumber = _.isNumber,
+		flattenDeep = _.flattenDeep;
 
 module.exports = Grammar;
 
@@ -49,10 +51,11 @@ _.extend(Grammar.prototype, {
 		var sql = [];
 
 		forEach(this.selectComponents, function (component) {
-			var value = query[component];
+			var value = !_.isFunction(query[component]) && query[component] ||
+									query[`_${component}`];
 
-			if(!isEmpty(value)) {
-				var method = 'compile' + inflection.capitalize(component);
+			if(isNumber(value) || !isEmpty(value)) {
+				var method = `compile${inflection.capitalize(component)}`;
 				sql[component] = this[method](query, value);
 			}
 		}, this);
@@ -122,7 +125,7 @@ _.extend(Grammar.prototype, {
       // Once we have everything ready to go, we will just concatenate all the parts to
       // build the final join statement SQL for the query and we can then return the
       // final clause back to the callers as a single, stringified join statement.
-      sql.push([type, 'join', table, 'on', clauses].join(' '));
+      sql.push(`${type} join ${table} on ${clauses}`);
 		}, this);
 
 		return sql.join(' ');
@@ -159,7 +162,7 @@ _.extend(Grammar.prototype, {
     forEach(query.wheres, function (where) {
     	var method = 'where' + where['type'];
 
-    	sql.push(where['boolean'] + ' ' + this[method](query, where));
+    	sql.push(`${where.boolean} ${this[method](query, where)}`);
     }, this);
 
     // If we actually have some where clauses, we will strip off the first boolean
@@ -168,7 +171,7 @@ _.extend(Grammar.prototype, {
     if(sql.length > 0) {
     	sql = sql.join(' ');
 
-    	return 'where ' + this.removeLeadingBoolean(sql);
+	    return `where ${this.removeLeadingBoolean(sql)}`;
     }
 
     return '';
@@ -195,7 +198,7 @@ _.extend(Grammar.prototype, {
 	whereBetween: function (query, where) {
 		var between = where.hasOwnProperty('not') ? 'not between' : 'between';
 
-		return [this.wrap(where.column), between, '? and ?'].join(' ');
+		return `${this.wrap(where.column)} ${between} ? and ?`;
 	},
 
 	whereExists: function (query, where) {
@@ -229,21 +232,21 @@ _.extend(Grammar.prototype, {
 	whereInSub: function (query, where) {
 		var select = this.compileSelect(where.query);
 
-		return this.wrap(where.column) + ' in (' + select + ')';
+		return `${this.wrap(where.column)} in (${select})`;
 	},
 
 	whereNotInSub: function (query, where) {
 		var select = this.compileSelect(where.query);
 
-		return this.wrap(where.column) + ' not in (' + select + ')';
+		return `${this.wrap(where.column)} not in (${select})`;
 	},
 
 	whereNull: function (query, where) {
-		return this.wrap(where.column) + ' is null';
+		return `${this.wrap(where.column)} is null`;
 	},
 
 	whereNotNull: function (query, where) {
-		return this.wrap(where.column) + ' is not null';
+		return `${this.wrap(where.column)} is not null`;
 	},
 
 	whereDate: function (query, where) {
@@ -265,7 +268,7 @@ _.extend(Grammar.prototype, {
 	dateBasedWhere: function (type, query, where) {
 		var value = this.parameter(where.value);
 
-		return type + '(' + this.wrap(where.column) + ') ' + where.operator + ' ' + value;
+		return `${type}(${this.wrap(where.column)}) ${where.operator} ${value}`;
 	},
 
 	whereRaw: function (query, where) {
@@ -274,7 +277,7 @@ _.extend(Grammar.prototype, {
 
 	compileGroups: function (query, havings) {
 		var sql = map([this, 'compileHaving'], havings).join(' ');
-		return 'having ' + this.removeLeadingBoolean(sql);
+		return `having ${this.removeLeadingBoolean(sql)}`;
 	},
 
 	compileHaving: function (having) {
@@ -292,25 +295,25 @@ _.extend(Grammar.prototype, {
 		var column = this.wrap(having.column);
 		var parameter = this.parameter(having.value);
 
-		return having.boolean + ' ' + column + ' ' + having.operator + ' ' + parameter;
+		return `${having.boolean} ${column} ${having.operator} ${parameter}`;
 	},
 
 	compileOrders: function (query, orders) {
-		return 'order by ' + map(orders, function (order) {
+		return `order by ${map(orders, function (order) {
 			if(order.hasOwnProperty('sql')) {
 				return order.sql;
 			}
 
 			return this.wrap(order.column) + ' ' + order.direction;
-		}).join(', ');
+		}).join(', ')}`;
 	},
 
 	compileLimit: function (query, limit) {
-		return 'limit ' + limit;
+		return `limit ${limit}`;
 	},
 
 	compileOffset: function (query, offset) {
-		return 'offset' + offset;
+		return `offset ${offset}`;
 	},
 
 	compileUnions: function (query) {
@@ -321,15 +324,15 @@ _.extend(Grammar.prototype, {
 		}, this);
 
 		if(query.hasOwnProperty('unionOrders')) {
-			sql += ' ' + this.compileOrders(query, query.unionOrders);
+			sql += ` ${this.compileOrders(query, query.unionOrders)}`;
 		}
 
 		if(query.hasOwnProperty('unionLimit')) {
-			sql += ' ' + this.compileLimit(query, query.unionLimit);
+			sql += ` ${this.compileLimit(query, query.unionLimit)}`;
 		}
 
 		if(query.hasOwnProperty('unionOffset')) {
-			sql += ' ' + this.compileOffset(query, query.unionOffset);
+			sql += ` ${this.compileOffset(query, query.unionOffset)}`;
 		}
 
 		return trim(sql);
@@ -345,10 +348,6 @@ _.extend(Grammar.prototype, {
     // simply makes creating the SQL easier for us since we can utilize the same
     // basic routine regardless of an amount of records given to us to insert.
     var table = this.wrapTable(query.from);
-
-    if(!isArray(first(values))) {
-    	values = [values];
-    }
 
     var columns = this.columnize(keys(first(values)));
 

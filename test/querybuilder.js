@@ -3,13 +3,16 @@ var QueryBuilder = require('../src/querybuilder');
 var Grammar = require('../src/grammars/grammar');
 var MySqlGrammar = require('../src/grammars/mysql-grammar');
 
+var MockConnection = require('../helpers/mock-connection');
+var mockConnection = new MockConnection();
+
 describe('QueryBuilder', function () {
 	var builder,
 			mySqlBuilder;
 
 	beforeEach(function () {
-		builder = new QueryBuilder(new Grammar());
-		mySqlBuilder = new QueryBuilder(new MySqlGrammar());
+		builder = new QueryBuilder(mockConnection, new Grammar());
+		mySqlBuilder = new QueryBuilder(mockConnection, new MySqlGrammar());
 	});
 
 	it('should set the columns to be selected', function () {
@@ -95,5 +98,13 @@ describe('QueryBuilder', function () {
     builder.select('*').from('users').whereYear('created_at', '=', 2014);
     assert.equal('select * from `users` where year(`created_at`) = ?', builder.toSql());
     assert.deepEqual({0 : 2014}, builder.getBindings());
+	});
+
+	it('should perform insert', function (done) {
+		builder.from('users').insert([
+			{ name: 'foo', email: 'bar', bio: 'about he' }
+		]).then(function () {
+			done();
+		});
 	});
 });

@@ -1,6 +1,6 @@
 {
   "name": "sqlbuilder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "inflection": "^1.7.1",
-    "lodash": "^3.10.0"
+    "lodash": "^3.10.0",
+    "mysql": "^2.7.0",
+    "q": "^1.4.1"
   }
 }

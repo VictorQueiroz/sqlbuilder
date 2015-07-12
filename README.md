@@ -11,17 +11,24 @@ npm install --save sqlbuilder
 
 Do what ever you want with your query:
 
+*Example 1*
 ```js
-var sqlbuilder = require('sqlbuilder');
-var MySqlGrammar = sqlbuilder.MySqlGrammar;
-var QueryBuilder = sqlbuilder.QueryBuilder;
+var builder = require('sqlbuilder')({
+	host: 'localhost',
+	user: 'root',
+	password: '',
+	database: 'mydb'
+});
 
-var mySqlBuilder = new QueryBuilder(new MySqlGrammar());
-
-var sql = mysqlBuilder
+builder
 .select('*').from('users')
 .whereYear('created_at', '=', 2014)
-.toSql();
+.toSql(); // select * from `users` where year(`created_at`) = ?
 
-// select * from `users` where year(`created_at`) = ?
+builder.get().then(function (response) {
+	var rows = response.rows,
+			fields = response.fields;
+
+	res.json(rows);
+});
 ```
