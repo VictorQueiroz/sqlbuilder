@@ -722,9 +722,9 @@ Builder.prototype = {
 	first: function (columns) {
 		columns = columns || ['*'];
 
-		var results = this.take(1).get(columns);
-
-		return results.length > 0 ? first(results) : null;
+		return this.take(1).get(columns).then(function (results) {
+			return results.length > 0 ? first(results) : null;
+		});
 	},
 
 	/**

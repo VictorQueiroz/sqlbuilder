@@ -137,4 +137,10 @@ describe('QueryBuilder', function () {
 			done(err);
 		});
 	});
+
+	it('should find a specific resource', function () {
+		mockConnection.expectQuery('select * from "users" where "id" = "1" limit 1');
+
+		builder.from('users').find(1, ['id', 'name']);
+	});
 });
