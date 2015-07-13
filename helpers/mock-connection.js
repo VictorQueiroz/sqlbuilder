@@ -1,5 +1,11 @@
+var _						= require('lodash');
 var Q 					= require('q');
 var util 				= require('../src/helpers');
+
+var first				= _.first;
+var extend			= _.extend;
+
+var assert			= require('assert');
 var Connection 	= require('../src/connection');
 
 util.inherits(MockConnection, Connection);

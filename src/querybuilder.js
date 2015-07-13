@@ -50,6 +50,10 @@ function Builder (connection, grammar) {
 }
 
 Builder.prototype = {
+	create: function () {
+		return new Builder(this.connection, this.grammar);
+	},
+
 	select: function (columns) {
 		this.columns = isArray(columns) ? columns : toArray(arguments);
 
@@ -85,7 +89,7 @@ Builder.prototype = {
 			throw new Error('Invalid argument');
 		}
 
-		this.selectRaw('(' + query + ') as ' + this.grammar.wrap(as), bindings);
+		this.selectRaw(`(${query}) as ${this.grammar.wrap(as)}`, bindings);
 	},
 
 	/**
