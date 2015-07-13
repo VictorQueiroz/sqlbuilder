@@ -723,7 +723,7 @@ Builder.prototype = {
 		columns = columns || ['*'];
 
 		return this.take(1).get(columns).then(function (results) {
-			return results.length > 0 ? first(results) : null;
+			return results;
 		});
 	},
 
