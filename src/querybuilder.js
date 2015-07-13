@@ -116,7 +116,7 @@ Builder.prototype = {
 	 * Set the table which the query is targeting.
 	 */
 	from: function (table) {
-		this.from = table;
+		this._from = table;
 
 		return this;
 	},
@@ -313,7 +313,7 @@ Builder.prototype = {
 		// do whatever it wants to a query then we will store it for compiling.
 		var query = this.newQuery();
 
-		query.from(this.from);
+		query._from(this._from);
 
 		callback(query);
 

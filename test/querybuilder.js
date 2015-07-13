@@ -107,4 +107,34 @@ describe('QueryBuilder', function () {
 			done();
 		});
 	});
+
+	it('should clone builder reusing the grammar and the connection', function () {
+		mockConnection.expectQuery('select * from "users" limit 10');
+		mockConnection.expectQuery('select * from "products"');
+
+		builder.select('*').from('users').limit(10).get(	).then(function () {
+			var b = builder.create();
+			b.select('*').from('products').get();
+
+			assert.equal(undefined, b._limit);
+		}).then(function () {
+			done();
+		}, function (err) {
+			done(err);
+		});
+	});
+
+	it('should perform multiple usages of the builder', function (done) {
+		mockConnection.expectQuery('select * from "users" limit 10');
+		mockConnection.expectQuery('select * from "products"');
+
+		builder.select('*').from('users').limit(10).get(	).then(function () {
+			var b = builder.create();
+			b.select('*').from('products').get();
+		}).then(function () {
+			done();
+		}, function (err) {
+			done(err);
+		});
+	});
 });

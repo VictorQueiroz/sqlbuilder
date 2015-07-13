@@ -347,7 +347,7 @@ _.extend(Grammar.prototype, {
 		// Essentially we will force every insert to be treated as a batch insert which
     // simply makes creating the SQL easier for us since we can utilize the same
     // basic routine regardless of an amount of records given to us to insert.
-    var table = this.wrapTable(query.from);
+    var table = this.wrapTable(query._from);
 
     var columns = this.columnize(keys(first(values)));
 
@@ -370,7 +370,7 @@ _.extend(Grammar.prototype, {
 	},
 
 	compileUpdate: function (query, values) {
-		var table = this.wrapTable(query.from);
+		var table = this.wrapTable(query._from);
 
 		// Each one of the columns in the update statements needs to be wrapped in the
     // keyword identifiers, also a place-holder needs to be created for each of
@@ -401,7 +401,7 @@ _.extend(Grammar.prototype, {
 	},
 
 	compileDelete: function (query) {
-		var table = this.wrapTable(query.from);
+		var table = this.wrapTable(query._from);
 
 		var where = isArray(query.wheres) ? this.compileWheres(query) : '';
 
@@ -411,7 +411,7 @@ _.extend(Grammar.prototype, {
 	compileTruncate: function (query) {
 		var obj = {};
 
-		obj[this.wrapTable(query.from)] = {};
+		obj[this.wrapTable(query._from)] = {};
 
 		return obj;
 	},
